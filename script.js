@@ -173,15 +173,20 @@ class AudioSystem {
     }
 
     play() {
-        if (!this.audioContext || !this.audioBuffer) {
+        if (!this.audioContext) {
+            this.initAudio();
+        }
+
+        if (!this.audioBuffer) {
             this.createAmbientSound();
         }
 
-        if (this.audioContext.state === 'suspended') {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
 
         if (!this.isPlaying && this.audioBuffer) {
+            // Create a new source each time (Web Audio API requirement)
             this.source = this.audioContext.createBufferSource();
             this.source.buffer = this.audioBuffer;
             this.source.loop = true;
@@ -193,7 +198,12 @@ class AudioSystem {
 
     pause() {
         if (this.source && this.isPlaying) {
-            this.source.stop();
+            try {
+                this.source.stop();
+            } catch (e) {
+                // Source might already be stopped
+            }
+            this.source = null;
             this.isPlaying = false;
         }
     }
@@ -484,6 +494,42 @@ class NavbarScroll {
 }
 
 // =====================
+// Logo Cycler
+// =====================
+class LogoCycler {
+    constructor() {
+        this.logos = [
+            '<span style="font-weight: 700;">&lt;XR/&gt;</span>',
+            '<span style="font-weight: 700;">{ XR }</span>',
+            '<i class="fas fa-cube"></i>',
+            '<i class="fas fa-vr-cardboard"></i>'
+        ];
+        this.currentIndex = 0;
+        this.logoElement = document.getElementById('logo');
+        this.init();
+    }
+
+    init() {
+        if (!this.logoElement) return;
+        // Set initial logo immediately
+        this.updateLogo();
+        // Start cycling after Font Awesome is loaded
+        setTimeout(() => {
+            setInterval(() => this.cycle(), 3000);
+        }, 500);
+    }
+
+    cycle() {
+        this.currentIndex = (this.currentIndex + 1) % this.logos.length;
+        this.updateLogo();
+    }
+
+    updateLogo() {
+        this.logoElement.innerHTML = this.logos[this.currentIndex];
+    }
+}
+
+// =====================
 // Initialize Everything
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -515,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new ContactForm();
     new InteractiveSounds(audioSystem);
     new NavbarScroll();
+    new LogoCycler();
 
     // Add active state to nav links based on scroll position
     const sections = document.querySelectorAll('section[id]');

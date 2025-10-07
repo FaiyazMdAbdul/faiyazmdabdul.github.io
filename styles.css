@@ -121,10 +121,10 @@ img {
 .audio-toggle,
 .theme-toggle {
     position: fixed;
-    top: var(--spacing-md);
+    top: 5rem;
     right: var(--spacing-md);
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -138,7 +138,7 @@ img {
 }
 
 .audio-toggle {
-    right: calc(var(--spacing-md) + 4rem);
+    right: calc(var(--spacing-md) + 3.5rem);
 }
 
 .audio-toggle:hover,
@@ -179,7 +179,7 @@ img {
     right: 0;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
-    z-index: 999;
+    z-index: 1001;
     border-bottom: 1px solid var(--border-color);
     transition: all var(--transition-base);
 }
@@ -204,6 +204,19 @@ img {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    min-width: 4rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo i {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem;
 }
 
 .nav-menu {
