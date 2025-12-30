@@ -30,7 +30,7 @@ class ThreeScene {
             0.1,
             1000
         );
-        this.camera.position.z = 5;
+        this.camera.position.z = 8;
 
         // Renderer
         this.renderer = new THREE.WebGLRenderer({
@@ -43,53 +43,63 @@ class ThreeScene {
     }
 
     createScene() {
-        // Create a subtle wireframe torus knot (represents XR/3D complexity)
-        const geometry = new THREE.TorusKnotGeometry(1.2, 0.35, 100, 16);
-
         // Get theme
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const wireframeColor = isDark ? 0xFFFFFF : 0x000000;
 
-        const material = new THREE.MeshBasicMaterial({
-            color: isDark ? 0x6366f1 : 0x8b5cf6,
+        // Create VR headset wireframe from primitives
+        const headsetGroup = new THREE.Group();
+
+        // Main headset body (box)
+        const bodyGeometry = new THREE.BoxGeometry(3, 1.5, 1.5);
+        const wireframeMaterial = new THREE.MeshBasicMaterial({
+            color: wireframeColor,
             wireframe: true,
-            transparent: true,
-            opacity: 0.15
+            transparent: false
         });
+        const bodyMesh = new THREE.Mesh(bodyGeometry, wireframeMaterial);
+        headsetGroup.add(bodyMesh);
 
-        this.mesh = new THREE.Mesh(geometry, material);
+        // Left eye lens (cylinder)
+        const lensGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+        const leftLens = new THREE.Mesh(lensGeometry, wireframeMaterial.clone());
+        leftLens.rotation.z = Math.PI / 2;
+        leftLens.position.set(-0.6, 0, 0.9);
+        headsetGroup.add(leftLens);
+
+        // Right eye lens (cylinder)
+        const rightLens = new THREE.Mesh(lensGeometry, wireframeMaterial.clone());
+        rightLens.rotation.z = Math.PI / 2;
+        rightLens.position.set(0.6, 0, 0.9);
+        headsetGroup.add(rightLens);
+
+        // Head strap (torus - partial arc)
+        const strapGeometry = new THREE.TorusGeometry(1.8, 0.08, 8, 32, Math.PI);
+        const strap = new THREE.Mesh(strapGeometry, wireframeMaterial.clone());
+        strap.rotation.y = Math.PI / 2;
+        strap.position.set(0, 0, 0);
+        headsetGroup.add(strap);
+
+        // Scale down and position the headset
+        headsetGroup.scale.set(0.6, 0.6, 0.6);
+        headsetGroup.position.set(2, -1, 0);
+
+        this.mesh = headsetGroup;
         this.scene.add(this.mesh);
 
-        // Add ambient particles
-        this.createParticles(isDark);
+        // Add grid floor (much lower and with reduced opacity)
+        const gridHelper = new THREE.GridHelper(20, 20, wireframeColor, wireframeColor);
+        gridHelper.position.y = -8;
+        gridHelper.material.opacity = 0.3;
+        gridHelper.material.transparent = true;
+        this.scene.add(gridHelper);
 
-        // Add subtle point light
-        const light = new THREE.PointLight(0x6366f1, 0.5, 100);
-        light.position.set(0, 0, 10);
-        this.scene.add(light);
+        // Add coordinate axes (X: red, Y: green, Z: blue)
+        const axesHelper = new THREE.AxesHelper(2);
+        axesHelper.position.set(-8, -7, 0);
+        this.scene.add(axesHelper);
     }
 
-    createParticles(isDark) {
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 500;
-        const positions = new Float32Array(particlesCount * 3);
-
-        for (let i = 0; i < particlesCount * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 20;
-        }
-
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-        const particlesMaterial = new THREE.PointsMaterial({
-            color: isDark ? 0x6366f1 : 0x8b5cf6,
-            size: 0.02,
-            transparent: true,
-            opacity: 0.3,
-            sizeAttenuation: true
-        });
-
-        this.particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        this.scene.add(this.particles);
-    }
 
     setupEventListeners() {
         // Mouse movement
@@ -118,35 +128,41 @@ class ThreeScene {
 
     updateTheme() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const wireframeColor = isDark ? 0xFFFFFF : 0x000000;
 
-        if (this.mesh && this.mesh.material) {
-            this.mesh.material.color.setHex(isDark ? 0x6366f1 : 0x8b5cf6);
+        // Update all materials in the headset group
+        if (this.mesh && this.mesh.children) {
+            this.mesh.children.forEach(child => {
+                if (child.material) {
+                    child.material.color.setHex(wireframeColor);
+                }
+            });
         }
 
-        if (this.particles && this.particles.material) {
-            this.particles.material.color.setHex(isDark ? 0x6366f1 : 0x8b5cf6);
+        // Update grid helper color and maintain opacity
+        const gridHelper = this.scene.children.find(child => child.type === 'GridHelper');
+        if (gridHelper) {
+            gridHelper.material.color.setHex(wireframeColor);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
         }
     }
 
     animate() {
         requestAnimationFrame(() => this.animate());
 
-        // Smooth rotation based on mouse position
+        // Rotation based on mouse position
         this.targetRotation.x = this.mouse.y * 0.3;
         this.targetRotation.y = this.mouse.x * 0.3;
 
         if (this.mesh) {
             // Subtle auto-rotation
-            this.mesh.rotation.x += 0.001;
-            this.mesh.rotation.y += 0.002;
+            this.mesh.rotation.x += 0.002;
+            this.mesh.rotation.y += 0.003;
 
             // Add mouse influence
             this.mesh.rotation.x += (this.targetRotation.x - this.mesh.rotation.x) * 0.05;
             this.mesh.rotation.y += (this.targetRotation.y - this.mesh.rotation.y) * 0.05;
-        }
-
-        if (this.particles) {
-            this.particles.rotation.y += 0.0005;
         }
 
         this.renderer.render(this.scene, this.camera);

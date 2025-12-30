@@ -1,119 +1,4 @@
 // =====================
-// Particle Canvas Background
-// =====================
-class ParticleBackground {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.particles = [];
-        this.particleCount = 50;
-        this.mouse = { x: null, y: null, radius: 150 };
-
-        this.init();
-        this.animate();
-        this.setupEventListeners();
-    }
-
-    init() {
-        this.resizeCanvas();
-        this.createParticles();
-    }
-
-    resizeCanvas() {
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
-    }
-
-    createParticles() {
-        this.particles = [];
-        for (let i = 0; i < this.particleCount; i++) {
-            this.particles.push({
-                x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                radius: Math.random() * 2 + 1
-            });
-        }
-    }
-
-    setupEventListeners() {
-        window.addEventListener('resize', () => {
-            this.resizeCanvas();
-            this.createParticles();
-        });
-
-        this.canvas.addEventListener('mousemove', (e) => {
-            this.mouse.x = e.x;
-            this.mouse.y = e.y;
-        });
-
-        this.canvas.addEventListener('mouseleave', () => {
-            this.mouse.x = null;
-            this.mouse.y = null;
-        });
-    }
-
-    animate() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        this.ctx.fillStyle = isDark ? 'rgba(10, 11, 15, 0.1)' : 'rgba(255, 255, 255, 0.1)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.particles.forEach((particle, i) => {
-            // Update position
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-
-            // Bounce off edges
-            if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
-            if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
-
-            // Mouse interaction
-            if (this.mouse.x !== null && this.mouse.y !== null) {
-                const dx = this.mouse.x - particle.x;
-                const dy = this.mouse.y - particle.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < this.mouse.radius) {
-                    const force = (this.mouse.radius - distance) / this.mouse.radius;
-                    particle.x -= (dx / distance) * force * 2;
-                    particle.y -= (dy / distance) * force * 2;
-                }
-            }
-
-            // Draw particle
-            this.ctx.beginPath();
-            this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-            this.ctx.fillStyle = isDark
-                ? `rgba(99, 102, 241, ${0.3 + Math.random() * 0.3})`
-                : `rgba(99, 102, 241, ${0.2 + Math.random() * 0.2})`;
-            this.ctx.fill();
-
-            // Connect particles
-            for (let j = i + 1; j < this.particles.length; j++) {
-                const other = this.particles[j];
-                const dx = particle.x - other.x;
-                const dy = particle.y - other.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 100) {
-                    this.ctx.beginPath();
-                    this.ctx.strokeStyle = isDark
-                        ? `rgba(139, 92, 246, ${0.1 * (1 - distance / 100)})`
-                        : `rgba(139, 92, 246, ${0.08 * (1 - distance / 100)})`;
-                    this.ctx.lineWidth = 1;
-                    this.ctx.moveTo(particle.x, particle.y);
-                    this.ctx.lineTo(other.x, other.y);
-                    this.ctx.stroke();
-                }
-            }
-        });
-
-        requestAnimationFrame(() => this.animate());
-    }
-}
-
-// =====================
 // Audio System
 // =====================
 class AudioSystem {
@@ -300,38 +185,6 @@ class SmoothScroll {
 }
 
 // =====================
-// Scroll Animations
-// =====================
-class ScrollAnimations {
-    constructor() {
-        this.init();
-    }
-
-    init() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
-        // Add scroll-fade-in class to elements
-        const elements = document.querySelectorAll(
-            '.project-card, .highlight-card, .timeline-item, .skill-category, .contact-item'
-        );
-
-        elements.forEach(el => {
-            el.classList.add('scroll-fade-in');
-            observer.observe(el);
-        });
-    }
-}
-
-// =====================
 // Mobile Navigation
 // =====================
 class MobileNav {
@@ -494,42 +347,6 @@ class NavbarScroll {
 }
 
 // =====================
-// Logo Cycler
-// =====================
-class LogoCycler {
-    constructor() {
-        this.logos = [
-            '<span style="font-weight: 700;">&lt;XR/&gt;</span>',
-            '<span style="font-weight: 700;">{ XR }</span>',
-            '<i class="fas fa-cube"></i>',
-            '<i class="fas fa-vr-cardboard"></i>'
-        ];
-        this.currentIndex = 0;
-        this.logoElement = document.getElementById('logo');
-        this.init();
-    }
-
-    init() {
-        if (!this.logoElement) return;
-        // Set initial logo immediately
-        this.updateLogo();
-        // Start cycling after Font Awesome is loaded
-        setTimeout(() => {
-            setInterval(() => this.cycle(), 3000);
-        }, 500);
-    }
-
-    cycle() {
-        this.currentIndex = (this.currentIndex + 1) % this.logos.length;
-        this.updateLogo();
-    }
-
-    updateLogo() {
-        this.logoElement.innerHTML = this.logos[this.currentIndex];
-    }
-}
-
-// =====================
 // Initialize Everything
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -556,12 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize other features
     new SmoothScroll();
-    new ScrollAnimations();
     new MobileNav();
     new ContactForm();
     new InteractiveSounds(audioSystem);
     new NavbarScroll();
-    new LogoCycler();
 
     // Add active state to nav links based on scroll position
     const sections = document.querySelectorAll('section[id]');
