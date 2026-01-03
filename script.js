@@ -400,11 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Preload theme preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme')) {
-        themeManager.currentTheme = 'dark';
-        themeManager.init();
-    }
+    // Theme is already initialized with light mode as default
 });
 
 // Handle visibility change for audio

@@ -229,6 +229,10 @@ img {
     color: #FFFFFF;
 }
 
+.nav-link i {
+    margin-right: 0.25rem;
+}
+
 .mobile-toggle {
     display: none;
     flex-direction: column;
