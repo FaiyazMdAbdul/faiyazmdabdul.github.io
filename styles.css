@@ -285,6 +285,51 @@ img {
     animation: fadeInUp 1s ease;
 }
 
+.availability-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    background: #00cc5510;
+    border: 2px solid #00cc55;
+    color: #00cc55;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: var(--ls-mono);
+    margin: 0 auto var(--spacing-sm);
+    width: fit-content;
+}
+
+.pulse-dot-line {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #00cc55;
+    display: block;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pulse-dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.pulse-dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
 .hero-badge {
     display: inline-block;
     padding: 1rem 2rem;
